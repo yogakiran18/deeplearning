@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Road Damage Detection AI | YOLO11 Local Host</title>
+  <meta name="description"
+    content="Localhost road damage inspection system powered by Ultralytics YOLO11. Upload video or image to detect cracks and potholes in real-time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body class="dark-theme">
+  <!-- Background Glow & Grid -->
+  <div class="bg-grid-pattern"></div>
+  <div class="bg-ambient-glow glow-1"></div>
+  <div class="bg-ambient-glow glow-2"></div>
+
+  <!-- Main Container -->
+  <div class="app-layout">
+
+    <!-- Header / Navbar -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M4 19L19 4M10 4l10 10M4 14l6 6"></path>
+            <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">RoadEye <span class="badge-accent">YOLO11</span></h1>
+          <p class="brand-subtitle">Autonomous Road Damage & Hazard Telemetry</p>
+        </div>
+      </div>
+
+      <!-- System Status Bar -->
+      <div class="header-status-panel">
+        <div class="status-indicator-pill" id="system-status-indicator">
+          <span class="pulse-dot"></span>
+          <span class="status-label" id="status-label-text">Model Ready</span>
+        </div>
+        <div class="meta-tag" id="meta-weights-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+            </path>
+          </svg>
+          <span id="weights-name-display">best.pt</span>
+        </div>
+        <div class="meta-tag" id="meta-device-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <rect x="9" y="9" width="6" height="6" />
+            <line x1="9" y1="1" x2="9" y2="4" />
+            <line x1="15" y1="1" x2="15" y2="4" />
+            <line x1="9" y1="20" x2="9" y2="23" />
+            <line x1="15" y1="20" x2="15" y2="23" />
+            <line x1="20" y1="9" x2="23" y2="9" />
+            <line x1="20" y1="14" x2="23" y2="14" />
+            <line x1="1" y1="9" x2="4" y2="9" />
+            <line x1="1" y1="14" x2="4" y2="14" />
+          </svg>
+          <span id="device-name-display">Auto GPU/CPU</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="navigation-tabs" role="tablist">
+      <button class="nav-tab active" id="tab-btn-video" data-tab="video-panel" role="tab" aria-selected="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="23 7 16 12 23 17 23 7"></polygon>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+        Video Inspection
+      </button>
+      <button class="nav-tab" id="tab-btn-image" data-tab="image-panel" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        Image Analysis
+      </button>
+      <button class="nav-tab" id="tab-btn-webcam" data-tab="webcam-panel" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Live Webcam
+      </button>
+      <button class="nav-tab" id="tab-btn-classes" data-tab="classes-panel" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        Damage Classes & Specs
+      </button>
+      <button class="nav-tab" id="tab-btn-database" data-tab="database-panel" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+        </svg>
+        Database & History
+      </button>
+    </nav>
+
+    <!-- Global Settings Ribbon -->
+    <section class="settings-ribbon card-glass">
+      <div class="ribbon-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+        Inference Parameters
+      </div>
+
+      <div class="ribbon-controls">
+        <!-- Confidence Slider -->
+        <div class="control-unit">
+          <div class="control-label-row">
+            <label for="conf-slider">Confidence Threshold</label>
+            <span class="val-badge" id="conf-val-badge">0.25</span>
+          </div>
+          <input type="range" id="conf-slider" min="0.05" max="0.95" step="0.05" value="0.25" class="range-slider">
+        </div>
+
+        <!-- Frame Skip Selector -->
+        <div class="control-unit">
+          <div class="control-label-row">
+            <label for="skip-select">Frame Stride / Skip</label>
+            <span class="hint-inline">(Speed vs Smoothness)</span>
+          </div>
+          <select id="skip-select" class="dropdown-styled">
+            <option value="1" selected>Every Frame (Skip 1 - Max Precision)</option>
+            <option value="2">Every 2nd Frame (Skip 2 - Balanced 2x Speed)</option>
+            <option value="3">Every 3rd Frame (Skip 3 - Fast 3x Speed)</option>
+            <option value="5">Every 5th Frame (Skip 5 - Turbo Scan)</option>
+          </select>
+        </div>
+
+        <!-- Class Filter Checkboxes -->
+        <div class="control-unit classes-unit">
+          <span class="control-group-title">Target Classes</span>
+          <div class="class-chips-group">
+            <label class="class-chip chip-d00">
+              <input type="checkbox" id="filter-d00" value="D00" checked>
+              <span class="chip-color-dot" style="background: #008cff;"></span>
+              <span>D00 Longitudinal</span>
+            </label>
+            <label class="class-chip chip-d10">
+              <input type="checkbox" id="filter-d10" value="D10" checked>
+              <span class="chip-color-dot" style="background: #32cd32;"></span>
+              <span>D10 Transverse</span>
+            </label>
+            <label class="class-chip chip-d20">
+              <input type="checkbox" id="filter-d20" value="D20" checked>
+              <span class="chip-color-dot" style="background: #ffa500;"></span>
+              <span>D20 Alligator</span>
+            </label>
+            <label class="class-chip chip-d40">
+              <input type="checkbox" id="filter-d40" value="D40" checked>
+              <span class="chip-color-dot" style="background: #dc2222;"></span>
+              <span>D40 Pothole</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- HUD Switch -->
+        <div class="control-unit toggle-unit">
+          <label class="switch-container" for="toggle-hud">
+            <input type="checkbox" id="toggle-hud" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-label">Telemetry HUD Overlay</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Panels -->
+    <main class="main-content-area">
+
+      <!-- ========================================== -->
+      <!-- 1. VIDEO INSPECTION PANEL (HERO) -->
+      <!-- ========================================== -->
+      <section class="tab-panel active" id="video-panel">
+
+        <!-- Video Upload & Input Row -->
+        <div class="card-glass upload-container">
+          <div class="dropzone" id="video-dropzone">
+            <input type="file" id="video-file-input" accept="video/mp4,video/avi,video/mov,video/mkv,video/webm"
+              class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="upload-icon-pulse">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <h2 class="dropzone-title">Upload Road Survey or Dashcam Video</h2>
+              <p class="dropzone-desc">Drag & drop MP4, AVI, MOV, or WEBM file here, or click to browse</p>
+
+              <div class="action-buttons-group">
+                <button type="button" class="btn btn-secondary" id="btn-browse-video">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  Browse Video
+                </button>
+                <span class="divider-or">OR</span>
+                <button type="button" class="btn btn-accent-outline" id="btn-sample-video">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Load Sample Road Video (60 Frames)
+                </button>
+              </div>
+
+              <div class="selected-file-display hidden" id="video-selected-file-bar">
+                <span class="file-icon">🎬</span>
+                <span class="file-name" id="video-selected-name">video.mp4</span>
+                <span class="file-size" id="video-selected-size">12.4 MB</span>
+                <button type="button" class="btn-icon-clear" id="btn-clear-video" title="Remove">&times;</button>
+              </div>
+
+              <!-- Direct Sample Video Library (5 Clickable Samples) -->
+              <div class="sample-gallery-section" id="sample-video-gallery-container">
+                <div class="sample-gallery-header">
+                  <span class="sample-gallery-label">⚡ Direct Sample Video Library (Click to load directly):</span>
+                </div>
+                <div class="sample-gallery-grid">
+                  <div class="sample-card sample-video-card" data-sample-video="sample_road.mp4" title="Click to load Highway Damage Scan">
+                    <img src="/samples/videos/sample_road.jpg" alt="Highway Scan" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Highway Scan</span>
+                      <span class="sample-badge badge-multi">D00+D40</span>
+                    </div>
+                  </div>
+                  <div class="sample-card sample-video-card" data-sample-video="pothole_cluster_road.mp4" title="Click to load Urban Potholes">
+                    <img src="/samples/videos/pothole_cluster_road.jpg" alt="Urban Potholes" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Urban Potholes</span>
+                      <span class="sample-badge badge-d40">D40</span>
+                    </div>
+                  </div>
+                  <div class="sample-card sample-video-card" data-sample-video="pothole_patrol_drive.mp4" title="Click to load Pothole Hazard">
+                    <img src="/samples/videos/pothole_patrol_drive.jpg" alt="Pothole Hazard" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Pothole Hazard</span>
+                      <span class="sample-badge badge-d40">D40</span>
+                    </div>
+                  </div>
+                  <div class="sample-card sample-video-card" data-sample-video="cracked_highway_drive.mp4" title="Click to load Cracked Highway">
+                    <img src="/samples/videos/cracked_highway_drive.jpg" alt="Cracked Highway" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Cracked Highway</span>
+                      <span class="sample-badge badge-d00">D00+D10</span>
+                    </div>
+                  </div>
+                  <div class="sample-card sample-video-card" data-sample-video="alligator_fatigue_road.mp4" title="Click to load Alligator Fatigue">
+                    <img src="/samples/videos/alligator_fatigue_road.jpg" alt="Alligator Fatigue" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Alligator Fatigue</span>
+                      <span class="sample-badge badge-d20">D20</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Action Trigger -->
+          <div class="action-footer">
+            <button type="button" class="btn btn-primary btn-glow" id="btn-start-video-detection" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Run Road Damage Detection
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Processing Progress Card (Hidden by default) -->
+        <div class="card-glass processing-container hidden" id="video-processing-card">
+          <div class="card-header-flex">
+            <div class="processing-title-group">
+              <span class="spinner-ring"></span>
+              <div>
+                <h3 class="card-title">Processing Video Footage...</h3>
+                <p class="card-subtitle">Running YOLO11 frame inference & telemetry calculations</p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-danger-outline btn-sm" id="btn-cancel-video">Cancel Job</button>
+          </div>
+
+          <!-- Progress Bar & Metrics -->
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="video-progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="progress-stats-row">
+              <span class="progress-pct" id="video-progress-pct">0%</span>
+              <span class="progress-frames" id="video-progress-frames">Frame: 0 / 0</span>
+              <span class="progress-fps" id="video-progress-fps">0.0 FPS</span>
+            </div>
+          </div>
+
+          <!-- Live Preview & Running Tally Grid -->
+          <div class="processing-live-grid">
+            <div class="live-preview-box">
+              <div class="box-tag">LIVE SCAN MONITOR</div>
+              <img id="video-live-preview-img" alt="Live Processing Frame" src="" class="preview-thumbnail">
+              <div class="scanning-laser-line"></div>
+            </div>
+
+            <div class="live-counters-box">
+              <div class="box-tag">RUNNING DETECTIONS</div>
+              <div class="counters-stack">
+                <div class="counter-row d00">
+                  <span class="counter-dot" style="background:#008cff;"></span>
+                  <span class="counter-label">D00 Longitudinal Crack</span>
+                  <span class="counter-val" id="live-count-d00">0</span>
+                </div>
+                <div class="counter-row d10">
+                  <span class="counter-dot" style="background:#32cd32;"></span>
+                  <span class="counter-label">D10 Transverse Crack</span>
+                  <span class="counter-val" id="live-count-d10">0</span>
+                </div>
+                <div class="counter-row d20">
+                  <span class="counter-dot" style="background:#ffa500;"></span>
+                  <span class="counter-label">D20 Alligator Crack</span>
+                  <span class="counter-val" id="live-count-d20">0</span>
+                </div>
+                <div class="counter-row d40">
+                  <span class="counter-dot" style="background:#dc2222;"></span>
+                  <span class="counter-label">D40 Pothole</span>
+                  <span class="counter-val" id="live-count-d40">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Results Card (Hidden until complete) -->
+        <div class="card-glass results-container hidden" id="video-results-card">
+          <div class="results-header">
+            <div>
+              <h2 class="card-title text-gradient">Inspection Complete</h2>
+              <p class="card-subtitle">Annotated video rendered with full telemetry overlay</p>
+            </div>
+            <div class="results-actions">
+              <a href="#" id="btn-download-video-mp4" class="btn btn-primary" download>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download MP4 Video
+              </a>
+              <a href="#" id="btn-download-video-csv" class="btn btn-secondary" download>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                Download Detections CSV
+              </a>
+            </div>
+          </div>
+
+          <!-- Video Player + PCI Health Card Grid -->
+          <div class="results-content-grid">
+            <!-- HTML5 Video Player -->
+            <div class="player-wrapper">
+              <div class="video-container-card">
+                <video id="results-video-player" controls playsinline preload="auto">
+                  <source id="results-video-source" src="" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+
+            <!-- Road Condition Index Card -->
+            <div class="telemetry-summary-card">
+              <h3 class="summary-card-title">Pavement Health Assessment</h3>
+
+              <div class="pci-dial-display">
+                <div class="pci-score-number" id="video-pci-score">85</div>
+                <div class="pci-meta">
+                  <div class="pci-score-max">/ 100 PCI</div>
+                  <span class="pci-rating-badge" id="video-pci-badge">Good Condition</span>
+                </div>
+              </div>
+
+              <p class="pci-summary-text" id="video-pci-summary">Road surface shows minimal structural distress.</p>
+
+              <!-- Final Detected Classes Breakdown -->
+              <div class="final-breakdown-list">
+                <div class="final-stat-box">
+                  <span class="stat-num" id="res-d00-count">0</span>
+                  <span class="stat-lbl">Longitudinal Cracks</span>
+                </div>
+                <div class="final-stat-box">
+                  <span class="stat-num" id="res-d10-count">0</span>
+                  <span class="stat-lbl">Transverse Cracks</span>
+                </div>
+                <div class="final-stat-box">
+                  <span class="stat-num" id="res-d20-count">0</span>
+                  <span class="stat-lbl">Alligator Cracks</span>
+                </div>
+                <div class="final-stat-box">
+                  <span class="stat-num stat-pothole" id="res-d40-count">0</span>
+                  <span class="stat-lbl">Potholes</span>
+                </div>
+              </div>
+
+              <div class="job-meta-footer">
+                <span>Total Detections: <strong id="res-total-det">0</strong></span>
+                <span>Render Time: <strong id="res-time-det">0.0s</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 2. IMAGE ANALYSIS PANEL -->
+      <!-- ========================================== -->
+      <section class="tab-panel" id="image-panel">
+        <div class="card-glass upload-container">
+          <div class="dropzone" id="image-dropzone">
+            <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/jpg,image/webp,image/bmp"
+              class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="upload-icon-pulse">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <h2 class="dropzone-title">Upload Road Surface Photograph</h2>
+              <p class="dropzone-desc">Drag & drop JPG, PNG, or WEBP image here, or select from disk</p>
+
+              <div class="action-buttons-group">
+                <button type="button" class="btn btn-secondary" id="btn-browse-image">Browse Image</button>
+                <span class="divider-or">OR</span>
+                <button type="button" class="btn btn-accent-outline" id="btn-sample-image">Load Sample Road
+                  Image</button>
+              </div>
+
+              <div class="selected-file-display hidden" id="image-selected-file-bar">
+                <span class="file-icon">🖼️</span>
+                <span class="file-name" id="image-selected-name">image.jpg</span>
+                <button type="button" class="btn-icon-clear" id="btn-clear-image" title="Remove">&times;</button>
+              </div>
+
+              <!-- Direct Sample Library (5 Clickable Samples) -->
+              <div class="sample-gallery-section" id="sample-gallery-container">
+                <div class="sample-gallery-header">
+                  <span class="sample-gallery-label">⚡ Direct Sample Library (Click to load directly):</span>
+                </div>
+                <div class="sample-gallery-grid">
+                  <div class="sample-card" data-sample="pothole.jpg" title="Click to load Pothole (D40)">
+                    <img src="/samples/pothole.jpg" alt="Pothole" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Pothole</span>
+                      <span class="sample-badge badge-d40">D40</span>
+                    </div>
+                  </div>
+                  <div class="sample-card" data-sample="longitudinal_crack.jpg"
+                    title="Click to load Longitudinal Crack (D00)">
+                    <img src="/samples/longitudinal_crack.jpg" alt="Longitudinal Crack" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Longitudinal Crack</span>
+                      <span class="sample-badge badge-d00">D00</span>
+                    </div>
+                  </div>
+                  <div class="sample-card" data-sample="transverse_crack.jpg"
+                    title="Click to load Transverse Crack (D10)">
+                    <img src="/samples/transverse_crack.jpg" alt="Transverse Crack" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Transverse Crack</span>
+                      <span class="sample-badge badge-d10">D10</span>
+                    </div>
+                  </div>
+                  <div class="sample-card" data-sample="alligator_crack.jpg"
+                    title="Click to load Alligator Crack (D20)">
+                    <img src="/samples/alligator_crack.jpg" alt="Alligator Crack" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Alligator Crack</span>
+                      <span class="sample-badge badge-d20">D20</span>
+                    </div>
+                  </div>
+                  <div class="sample-card" data-sample="multi_defect_road.jpg" title="Click to load Multi-Defect Road">
+                    <img src="/samples/multi_defect_road.jpg" alt="Multi-Defect Road" class="sample-thumb">
+                    <div class="sample-info">
+                      <span class="sample-title">Multi-Defect Road</span>
+                      <span class="sample-badge badge-multi">D00+D20</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-footer">
+            <button type="button" class="btn btn-primary btn-glow" id="btn-start-image-detection" disabled>
+              Run Image Damage Detection
+            </button>
+          </div>
+        </div>
+
+        <!-- Image Results Card -->
+        <div class="card-glass results-container hidden" id="image-results-card">
+          <div class="results-header">
+            <div>
+              <h2 class="card-title text-gradient">Image Inspection Results</h2>
+              <p class="card-subtitle" id="image-inference-time-sub">Inference completed in 15ms</p>
+            </div>
+            <div class="results-actions">
+              <a href="#" id="btn-download-image-result" class="btn btn-primary" download="road_damage_annotated.jpg">
+                Download Annotated Image
+              </a>
+            </div>
+          </div>
+
+          <!-- Comparison Display -->
+          <div class="image-comparison-grid">
+            <div class="comparison-card">
+              <div class="box-tag">ORIGINAL SURFACE</div>
+              <img id="img-result-original" alt="Original Road Surface" src="" class="img-fluid-preview">
+            </div>
+            <div class="comparison-card">
+              <div class="box-tag">AI DETECTED DAMAGE</div>
+              <img id="img-result-annotated" alt="Annotated Road Damage" src="" class="img-fluid-preview">
+            </div>
+          </div>
+
+          <!-- Detection Details Table -->
+          <div class="detections-table-wrapper">
+            <h3 class="table-section-title">Detected Faults Breakdown</h3>
+            <table class="styled-table" id="image-detections-table">
+              <thead>
+                <tr>
+                  <th>Fault Code</th>
+                  <th>Damage Classification</th>
+                  <th>Confidence</th>
+                  <th>Bounding Box (X1, Y1, X2, Y2)</th>
+                </tr>
+              </thead>
+              <tbody id="image-detections-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DATABASE & INSPECTION HISTORY PANEL -->
+      <section class="panel-view hidden" id="database-panel" role="tabpanel" aria-labelledby="tab-btn-database">
+        <div class="card-glass">
+          <div class="card-header-row">
+            <div>
+              <h2 class="card-title text-gradient">Inspection Database & Pavement History</h2>
+              <p class="card-subtitle">Persisted SQLite database logging all image, video, and webcam road inspections
+              </p>
+            </div>
+            <button class="btn btn-secondary" id="btn-refresh-db">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              Refresh Database
+            </button>
+          </div>
+
+          <!-- Database Stats Summary Cards -->
+          <div class="db-stats-grid">
+            <div class="db-stat-card">
+              <div class="db-stat-label">Total Inspections</div>
+              <div class="db-stat-value text-gradient" id="db-stat-total-inspections">--</div>
+              <div class="db-stat-sub">Logged in SQLite database</div>
+            </div>
+            <div class="db-stat-card">
+              <div class="db-stat-label">Total Defects Detected</div>
+              <div class="db-stat-value text-gradient" id="db-stat-total-defects" style="color: #00d2ff;">--</div>
+              <div class="db-stat-sub">Across all road inspections</div>
+            </div>
+            <div class="db-stat-card">
+              <div class="db-stat-label">Average Road Health</div>
+              <div class="db-stat-value" id="db-stat-avg-pci" style="color: #10b981;">--</div>
+              <div class="db-stat-sub">Overall PCI Score</div>
+            </div>
+            <div class="db-stat-card">
+              <div class="db-stat-label">Database Status</div>
+              <div class="db-stat-value" style="color: #10b981; font-size: 1.15rem; margin-top: 6px;">Connected</div>
+              <div class="db-stat-sub" style="font-size: 0.72rem; word-break: break-all;">outputs/road_damage.db</div>
+            </div>
+          </div>
+
+          <!-- Inspections Log Table -->
+          <div class="db-table-section">
+            <div class="db-table-header">
+              <h3 class="section-title">Recent Inspection Records</h3>
+              <input type="text" class="db-search-input" id="db-search-input"
+                placeholder="Search by media name, rating, or ID..." />
+            </div>
+            <div class="table-responsive">
+              <table class="detections-table" id="db-inspections-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Media Name</th>
+                    <th>Type</th>
+                    <th>Date / Time</th>
+                    <th>Defects (D00 | D10 | D20 | D40)</th>
+                    <th>Total Faults</th>
+                    <th>PCI Score</th>
+                    <th>Rating</th>
+                  </tr>
+                </thead>
+                <tbody id="db-inspections-tbody">
+                  <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">
+                      Loading inspection records from SQLite database...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. LIVE WEBCAM SCAN PANEL -->
+      <!-- ========================================== -->
+      <section class="tab-panel" id="webcam-panel">
+        <div class="card-glass webcam-card">
+          <div class="webcam-header-row">
+            <div>
+              <h2 class="card-title">Real-Time Camera Scanner</h2>
+              <p class="card-subtitle">Stream webcam frames directly to local YOLO11 inference engine</p>
+            </div>
+            <div class="webcam-ctrl-buttons">
+              <button type="button" class="btn btn-primary" id="btn-start-webcam">Start Camera</button>
+              <button type="button" class="btn btn-danger-outline" id="btn-stop-webcam" disabled>Stop Camera</button>
+            </div>
+          </div>
+
+          <div class="webcam-viewport-container">
+            <video id="webcam-video-hidden" autoplay playsinline muted style="display: none;"></video>
+            <canvas id="webcam-canvas-hidden" style="display: none;"></canvas>
+
+            <div class="webcam-display-wrapper">
+              <img id="webcam-annotated-stream" alt="Live Camera Road Damage Stream" class="webcam-stream-img hidden">
+              <div class="webcam-placeholder" id="webcam-placeholder-box">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <p>Click "Start Camera" to initiate live video inspection</p>
+              </div>
+            </div>
+
+            <!-- Webcam Telemetry Overlay -->
+            <div class="webcam-hud-stats" id="webcam-hud-bar">
+              <span>CAMERA FPS: <strong id="webcam-fps-val">0.0</strong></span>
+              <span>LATENCY: <strong id="webcam-latency-val">0 ms</strong></span>
+              <span>DETECTIONS: <strong id="webcam-count-val">0</strong></span>
+            </div>
+          </div>
+        </div>
+        <!-- 5. DATABASE & INSPECTION HISTORY PANEL -->
+        <section class="panel-view hidden" id="database-panel" role="tabpanel" aria-labelledby="tab-btn-database">
+          <div class="card-glass">
+            <div class="card-header-row">
+              <div>
+                <h2 class="card-title text-gradient">Inspection Database & Pavement History</h2>
+                <p class="card-subtitle">Persisted SQLite database logging all image, video, and webcam road inspections
+                </p>
+              </div>
+              <button class="btn btn-secondary" id="btn-refresh-db">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Refresh Database
+              </button>
+            </div>
+
+            <!-- Database Stats Summary Cards -->
+            <div class="db-stats-grid">
+              <div class="db-stat-card">
+                <div class="db-stat-label">Total Inspections</div>
+                <div class="db-stat-value text-gradient" id="db-stat-total-inspections">--</div>
+                <div class="db-stat-sub">Logged in SQLite database</div>
+              </div>
+              <div class="db-stat-card">
+                <div class="db-stat-label">Total Defects Detected</div>
+                <div class="db-stat-value text-gradient" id="db-stat-total-defects" style="color: #00d2ff;">--</div>
+                <div class="db-stat-sub">Across all road inspections</div>
+              </div>
+              <div class="db-stat-card">
+                <div class="db-stat-label">Average Road Health</div>
+                <div class="db-stat-value" id="db-stat-avg-pci" style="color: #10b981;">--</div>
+                <div class="db-stat-sub">Overall PCI Score</div>
+              </div>
+              <div class="db-stat-card">
+                <div class="db-stat-label">Database Status</div>
+                <div class="db-stat-value" style="color: #10b981; font-size: 1.15rem; margin-top: 6px;">Connected</div>
+                <div class="db-stat-sub" style="font-size: 0.72rem; word-break: break-all;">outputs/road_damage.db</div>
+              </div>
+            </div>
+
+            <!-- Inspections Log Table -->
+            <div class="db-table-section">
+              <div class="db-table-header">
+                <h3 class="section-title">Recent Inspection Records</h3>
+                <input type="text" class="db-search-input" id="db-search-input"
+                  placeholder="Search by media name, rating, or ID..." />
+              </div>
+              <div class="table-responsive">
+                <table class="detections-table" id="db-inspections-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Media Name</th>
+                      <th>Type</th>
+                      <th>Date / Time</th>
+                      <th>Defects (D00 | D10 | D20 | D40)</th>
+                      <th>Total Faults</th>
+                      <th>PCI Score</th>
+                      <th>Rating</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-inspections-tbody">
+                    <tr>
+                      <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">
+                        Loading inspection records from SQLite database...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 4. DAMAGE CLASSES & MODEL SPECS PANEL -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="classes-panel">
+          <div class="card-glass specs-card">
+            <h2 class="card-title text-gradient">Road Damage Classification Scheme</h2>
+            <p class="card-subtitle">Ultralytics YOLO11 model trained on the Road Damage Dataset (RDD)</p>
+
+            <div class="classes-info-grid">
+              <!-- D00 -->
+              <div class="class-spec-box border-d00">
+                <div class="spec-badge-row">
+                  <span class="code-badge" style="background: rgba(0,140,255,0.2); color:#008cff;">D00</span>
+                  <span class="severity-tag">Severity: Moderate</span>
+                </div>
+                <h3 class="class-title">Longitudinal Crack</h3>
+                <p class="class-desc">Cracks running parallel to the direction of vehicular travel. Primarily caused by
+                  paving lane joint shrinkage or subgrade settlement.</p>
+                <div class="spec-footer">Color Code: <span class="hex-color" style="color: #008cff;">#008CFF
+                    Azure</span></div>
+              </div>
+
+              <!-- D10 -->
+              <div class="class-spec-box border-d10">
+                <div class="spec-badge-row">
+                  <span class="code-badge" style="background: rgba(50,205,50,0.2); color:#32cd32;">D10</span>
+                  <span class="severity-tag">Severity: Moderate</span>
+                </div>
+                <h3 class="class-title">Transverse Crack</h3>
+                <p class="class-desc">Cracks running perpendicular to the roadway centerline. Typically caused by
+                  thermal contraction cycles and daily temperature swings.</p>
+                <div class="spec-footer">Color Code: <span class="hex-color" style="color: #32cd32;">#32CD32 Lime
+                    Green</span></div>
+              </div>
+
+              <!-- D20 -->
+              <div class="class-spec-box border-d20">
+                <div class="spec-badge-row">
+                  <span class="code-badge" style="background: rgba(255,165,0,0.2); color:#ffa500;">D20</span>
+                  <span class="severity-tag">Severity: High</span>
+                </div>
+                <h3 class="class-title">Alligator Crack</h3>
+                <p class="class-desc">Interconnected series of multi-sided cracks resembling reptile skin. Indicates
+                  structural fatigue failure of the asphalt base under heavy traffic loads.</p>
+                <div class="spec-footer">Color Code: <span class="hex-color" style="color: #ffa500;">#FFA500 Bright
+                    Orange</span></div>
+              </div>
+
+              <!-- D40 -->
+              <div class="class-spec-box border-d40">
+                <div class="spec-badge-row">
+                  <span class="code-badge" style="background: rgba(220,34,34,0.2); color:#dc2222;">D40</span>
+                  <span class="severity-tag severity-critical">Severity: Critical</span>
+                </div>
+                <h3 class="class-title">Pothole</h3>
+                <p class="class-desc">Bowl-shaped depressions in the road surface resulting from subsurface water
+                  penetration and traffic wear. Poses severe hazards to vehicles.</p>
+                <div class="spec-footer">Color Code: <span class="hex-color" style="color: #dc2222;">#DC2222 Crimson
+                    Red</span></div>
+              </div>
+            </div>
+
+            <div class="model-architecture-block">
+              <h3 class="section-title">Model Architecture & Specifications</h3>
+              <div class="specs-table-wrapper">
+                <table class="specs-table">
+                  <tr>
+                    <td>Framework</td>
+                    <td>Ultralytics YOLO11 (PyTorch)</td>
+                  </tr>
+                  <tr>
+                    <td>Inference Resolution</td>
+                    <td>640 x 640 pixels</td>
+                  </tr>
+                  <tr>
+                    <td>Data Format</td>
+                    <td>YOLO Normalized (class_id, x_center, y_center, width, height)</td>
+                  </tr>
+                  <tr>
+                    <td>Local Checkpoint</td>
+                    <td><code>weights/best.pt</code></td>
+                  </tr>
+                  <tr>
+                    <td>Video Encoding</td>
+                    <td>H.264 High Profile (FFmpeg) with Faststart Web Streaming</td>
+                  </tr>
+                  <tr>
+                    <td>Telemetry Index</td>
+                    <td>ASTM D6433 Pavement Condition Index (PCI) Adapted</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- 5. DATABASE & INSPECTION HISTORY PANEL -->
+          <section class="panel-view hidden" id="database-panel" role="tabpanel" aria-labelledby="tab-btn-database">
+            <div class="card-glass">
+              <div class="card-header-row">
+                <div>
+                  <h2 class="card-title text-gradient">Inspection Database & Pavement History</h2>
+                  <p class="card-subtitle">Persisted SQLite database logging all image, video, and webcam road
+                    inspections</p>
+                </div>
+                <button class="btn btn-secondary" id="btn-refresh-db">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  Refresh Database
+                </button>
+              </div>
+
+              <!-- Database Stats Summary Cards -->
+              <div class="db-stats-grid">
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Total Inspections</div>
+                  <div class="db-stat-value text-gradient" id="db-stat-total-inspections">--</div>
+                  <div class="db-stat-sub">Logged in SQLite database</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Total Defects Detected</div>
+                  <div class="db-stat-value text-gradient" id="db-stat-total-defects" style="color: #00d2ff;">--</div>
+                  <div class="db-stat-sub">Across all road inspections</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Average Road Health</div>
+                  <div class="db-stat-value" id="db-stat-avg-pci" style="color: #10b981;">--</div>
+                  <div class="db-stat-sub">Overall PCI Score</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Database Status</div>
+                  <div class="db-stat-value" style="color: #10b981; font-size: 1.15rem; margin-top: 6px;">Connected
+                  </div>
+                  <div class="db-stat-sub" style="font-size: 0.72rem; word-break: break-all;">outputs/road_damage.db
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inspections Log Table -->
+              <div class="db-table-section">
+                <div class="db-table-header">
+                  <h3 class="section-title">Recent Inspection Records</h3>
+                  <input type="text" class="db-search-input" id="db-search-input"
+                    placeholder="Search by media name, rating, or ID..." />
+                </div>
+                <div class="table-responsive">
+                  <table class="detections-table" id="db-inspections-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Media Name</th>
+                        <th>Type</th>
+                        <th>Date / Time</th>
+                        <th>Defects (D00 | D10 | D20 | D40)</th>
+                        <th>Total Faults</th>
+                        <th>PCI Score</th>
+                        <th>Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody id="db-inspections-tbody">
+                      <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">
+                          Loading inspection records from SQLite database...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. DATABASE & INSPECTION HISTORY PANEL -->
+          <section class="panel-view hidden" id="database-panel" role="tabpanel" aria-labelledby="tab-btn-database">
+            <div class="card-glass">
+              <div class="card-header-row">
+                <div>
+                  <h2 class="card-title text-gradient">Inspection Database & Pavement History</h2>
+                  <p class="card-subtitle">Persisted SQLite database logging all image, video, and webcam road
+                    inspections</p>
+                </div>
+                <button class="btn btn-secondary" id="btn-refresh-db">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  Refresh Database
+                </button>
+              </div>
+
+              <!-- Database Stats Summary Cards -->
+              <div class="db-stats-grid">
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Total Inspections</div>
+                  <div class="db-stat-value text-gradient" id="db-stat-total-inspections">--</div>
+                  <div class="db-stat-sub">Logged in SQLite database</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Total Defects Detected</div>
+                  <div class="db-stat-value text-gradient" id="db-stat-total-defects" style="color: #00d2ff;">--</div>
+                  <div class="db-stat-sub">Across all road inspections</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Average Road Health</div>
+                  <div class="db-stat-value" id="db-stat-avg-pci" style="color: #10b981;">--</div>
+                  <div class="db-stat-sub">Overall PCI Score</div>
+                </div>
+                <div class="db-stat-card">
+                  <div class="db-stat-label">Database Status</div>
+                  <div class="db-stat-value" style="color: #10b981; font-size: 1.15rem; margin-top: 6px;">Connected
+                  </div>
+                  <div class="db-stat-sub" style="font-size: 0.72rem; word-break: break-all;">outputs/road_damage.db
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inspections Log Table -->
+              <div class="db-table-section">
+                <div class="db-table-header">
+                  <h3 class="section-title">Recent Inspection Records</h3>
+                  <input type="text" class="db-search-input" id="db-search-input"
+                    placeholder="Search by media name, rating, or ID..." />
+                </div>
+                <div class="table-responsive">
+                  <table class="detections-table" id="db-inspections-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Media Name</th>
+                        <th>Type</th>
+                        <th>Date / Time</th>
+                        <th>Defects (D00 | D10 | D20 | D40)</th>
+                        <th>Total Faults</th>
+                        <th>PCI Score</th>
+                        <th>Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody id="db-inspections-tbody">
+                      <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">
+                          Loading inspection records from SQLite database...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Road Damage YOLO11 Local Host Web Application &bull; Pair Programming Engine &bull; Run locally via
+        <code>python app.py</code>
+      </p>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+
+</html>

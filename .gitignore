@@ -1,0 +1,25 @@
+# Datasets and training/inference outputs
+datasets/
+runs/
+outputs/
+weights/*.pt
+*.pt
+*.npz
+*.db
+
+# Secrets and environment variables
+.env
+.venv/
+env/
+venv/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.pytest_cache/
+
+# OS artifacts
+.DS_Store
+Thumbs.db

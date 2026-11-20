@@ -1,0 +1,13 @@
+# Dataset configuration for Road Damage Detection (YOLO11)
+path: datasets/road_damage  # dataset root directory relative to workspace
+train: train/images
+val: valid/images
+test: test/images
+
+# Classes
+nc: 4
+names:
+  0: D00  # Longitudinal crack
+  1: D10  # Transverse crack
+  2: D20  # Alligator crack
+  3: D40  # Pothole
